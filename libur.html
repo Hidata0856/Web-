@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informasi Libur Nasional 🎊</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        #video-bg {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem 0;
+            animation: neon 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes neon {
+            from {
+                text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
+            }
+            to {
+                text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 15px #0ff;
+            }
+        }
+
+        .card {
+            background: rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #0ff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .event-list {
+            list-style: none;
+        }
+
+        .event-item {
+            padding: 10px;
+            margin: 10px 0;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title {
+            color: #0ff;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date {
+            color: #0ff;
+            min-width: 65px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #0ff;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .card {
+                margin: 10px 0;
+            }
+        }
+
+        #refresh-btn {
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid #0ff;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 10px auto;
+            display: block;
+            transition: all 0.3s;
+        }
+
+        #refresh-btn:hover {
+            background: rgba(0, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop id="video-bg">
+        <source src="https://a.top4top.io/m_3316o7pwd1.mp4" type="video/mp4">
+    </video>
+
+    <div class="container">
+        <div class="header">
+            <h1>📅 Informasi Libur Nasional 🎉</h1>
+        </div>
+        <button id="refresh-btn">🔄 Refresh Data</button>
+        <div id="content">
+            <div class="loading">Loading data...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.siputzx.my.id/api/info/liburnasional';
+        const content = document.getElementById('content');
+        const refreshBtn = document.getElementById('refresh-btn');
+
+        // Emoji mappings for different types of events
+        const getEmoji = (event) => {
+            const lowercase = event.toLowerCase();
+            if (lowercase.includes('imlek')) return '🏮';
+            if (lowercase.includes('natal')) return '🎄';
+            if (lowercase.includes('idul fitri') || lowercase.includes('idul adha') || lowercase.includes('islam') || lowercase.includes('muhammad')) return '🌙';
+            if (lowercase.includes('nyepi')) return '🌺';
+            if (lowercase.includes('waisak')) return '☸️';
+            if (lowercase.includes('yesus') || lowercase.includes('paskah')) return '✝️';
+            if (lowercase.includes('musik')) return '🎵';
+            if (lowercase.includes('film')) return '🎬';
+            if (lowercase.includes('pers')) return '📰';
+            if (lowercase.includes('wanita')) return '👩';
+            if (lowercase.includes('perawat') || lowercase.includes('kesehatan')) return '👨‍⚕️';
+            if (lowercase.includes('sampah')) return '♻️';
+            if (lowercase.includes('gizi')) return '🥗';
+            return '📅';
+        };
+
+        // Format date to readable string
+        const formatDate = (dateStr) => {
+            const [month, day] = dateStr.split('-');
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            return `${day} ${months[parseInt(month) - 1]}`;
+        };
+
+        // Create event item HTML
+        const createEventItem = (date, event) => {
+            return `
+                <li class="event-item">
+                    <span class="date">${formatDate(date)}</span>
+                    ${getEmoji(event)} ${event}
+                </li>
+            `;
+        };
+
+        // Fetch and display data
+        const fetchData = async () => {
+            try {
+                content.innerHTML = '<div class="loading">Loading data...</div>';
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                let html = '';
+
+                // Today's events
+                if (data.data.hari_ini.events.length > 0) {
+                    html += `
+                        <div class="card">
+                            <h2 class="section-title">🌟 Hari Ini (${formatDate(data.data.hari_ini.tanggal)})</h2>
+                            <ul class="event-list">
+                                ${data.data.hari_ini.events.map(e => createEventItem(e.date, e.event)).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                // Upcoming holidays
+                if (data.data.mendatang.hari_libur.length > 0) {
+                    html += `
+                        <div class="card">
+                            <h2 class="section-title">🔜 Libur Mendatang</h2>
+                            <ul class="event-list">
+                                ${data.data.mendatang.hari_libur.map(e => createEventItem(e.date, e.event)).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                // Upcoming national events
+                if (data.data.mendatang.event_nasional.length > 0) {
+                    html += `
+                        <div class="card">
+                            <h2 class="section-title">📅 Event Nasional Mendatang</h2>
+                            <ul class="event-list">
+                                ${data.data.mendatang.event_nasional.map(e => createEventItem(e.date, e.event)).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                // All holidays
+                if (data.data.data.hari_libur.length > 0) {
+                    html += `
+                        <div class="card">
+                            <h2 class="section-title">📆 Semua Libur Nasional</h2>
+                            <ul class="event-list">
+                                ${data.data.data.hari_libur.map(e => createEventItem(e.date, e.event)).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                content.innerHTML = html;
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="card">
+                        <div class="section-title">❌ Error</div>
+                        <p>Gagal memuat data. Silakan coba lagi nanti.</p>
+                    </div>
+                `;
+            }
+        };
+
+        // Initial fetch
+        fetchData();
+
+        // Refresh button click handler
+        refreshBtn.addEventListener('click', fetchData);
+
+        // Auto refresh every 5 minutes
+        setInterval(fetchData, 300000);
+    </script>
+</body>
+</html>

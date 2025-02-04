@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tebak Bendera</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background: url("https://f.top4top.io/p_3316fn7ke1.jpg") no-repeat center center/cover;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+            text-align: center;
+        }
+
+        .game-container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 24px;
+            text-shadow: 0 0 10px cyan;
+        }
+
+        p {
+            font-size: 18px;
+        }
+
+        img {
+            width: 100%;
+            max-width: 250px;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 3px solid white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 12px 20px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            background-color: #ff073a;
+            color: white;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #d1062f;
+        }
+
+        #timer, #kesempatan {
+            font-size: 18px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: yellow;
+        }
+
+        .custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 20px;
+            color: white;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .alert-success {
+            background-color: #28a745;
+        }
+
+        .alert-fail {
+            background-color: #ff073a;
+        }
+
+        .alert-timeout {
+            background-color: #ffcc00;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h2>Tebak Bendera</h2>
+        <p>Tebak negara berdasarkan benderanya!</p>
+        
+        <img id="flagImage" src="" alt="Bendera">
+        <input type="text" id="jawaban" placeholder="Ketik nama negara di sini">
+        <button onclick="cekJawaban()">Submit</button>
+        <p id="timer">Sisa waktu: 1:00</p>
+        <p id="kesempatan">Kesempatan Tersisa: 5</p>
+    </div>
+
+    <div id="customAlert" class="custom-alert"></div>
+
+    <script>
+        let jawabanBenar = "";
+        let waktu = 60;
+        let timer;
+        let kesempatan = 5;
+
+        function getSoal() {
+            fetch("https://api.siputzx.my.id/api/games/tebakbendera")
+                .then(response => response.json())
+                .then(data => {
+                    jawabanBenar = data.name.toLowerCase();
+                    document.getElementById("flagImage").src = data.img;
+                    mulaiTimer();
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+        }
+
+        function mulaiTimer() {
+            clearInterval(timer);
+            waktu = 60;
+            document.getElementById("timer").innerText = "Sisa waktu: 1:00";
+
+            timer = setInterval(() => {
+                if (waktu <= 0) {
+                    clearInterval(timer);
+                    showAlert(`Waktu habis! Jawaban benar adalah: ${jawabanBenar.toUpperCase()}`, "alert-timeout");
+                    setTimeout(resetGame, 3000);
+                } else {
+                    let menit = Math.floor(waktu / 60);
+                    let detik = waktu % 60;
+                    document.getElementById("timer").innerText = `Sisa waktu: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
+                    waktu--;
+                }
+            }, 1000);
+        }
+
+        function cekJawaban() {
+            let jawabanUser = document.getElementById("jawaban").value.trim().toLowerCase();
+            if (jawabanUser === jawabanBenar) {
+                clearInterval(timer);
+                showAlert("Jawaban benar! Kamu menang!", "alert-success");
+                setTimeout(resetGame, 3000);
+            } else {
+                kesempatan--;
+                document.getElementById("kesempatan").innerText = `Kesempatan Tersisa: ${kesempatan}`;
+                if (kesempatan === 0) {
+                    clearInterval(timer);
+                    showAlert(`Kamu gagal! Jawaban benar adalah: ${jawabanBenar.toUpperCase()}`, "alert-fail");
+                    setTimeout(resetGame, 3000);
+                } else {
+                    showAlert("Jawaban salah! Coba lagi.", "alert-fail");
+                }
+            }
+        }
+
+        function showAlert(message, type) {
+            let alertBox = document.getElementById("customAlert");
+            alertBox.innerText = message;
+            alertBox.className = `custom-alert ${type}`;
+            alertBox.style.display = "block";
+
+            setTimeout(() => {
+                alertBox.style.display = "none";
+            }, 2000);
+        }
+
+        function resetGame() {
+            waktu = 60;
+            kesempatan = 5;
+            document.getElementById("jawaban").value = "";
+            document.getElementById("kesempatan").innerText = "Kesempatan Tersisa: 5";
+            getSoal();
+        }
+
+        getSoal();
+    </script>
+
+</body>
+</html>

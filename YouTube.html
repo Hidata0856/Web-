@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            background: rgba(0, 0, 255, 0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 0 20px #00f,
+                        0 0 40px #00f,
+                        0 0 60px #00f;
+            backdrop-filter: blur(10px);
+            width: 90%;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #00f;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px #00f,
+                         0 0 20px #00f;
+            font-size: 2rem;
+            letter-spacing: 1px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #00f;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border-radius: 10px;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            box-shadow: 0 0 10px #00f;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .download-button {
+            width: 100%;
+            padding: 1rem;
+            background: #00f;
+            border: none;
+            border-radius: 10px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .download-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px #00f;
+        }
+
+        #result {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #loading {
+            display: none;
+            color: #00f;
+            text-align: center;
+            margin: 1rem 0;
+            font-size: 1rem;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 0, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00f;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #error {
+            color: #4444ff;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+            padding: 0.8rem;
+            background: rgba(0, 0, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .info-text {
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <img src="https://h.top4top.io/p_33142384b1.jpg" alt="Background" class="background">
+    
+    <div class="container">
+        <h1>YouTube Downloader</h1>
+        <div class="input-group">
+            <input type="text" id="videoUrl" placeholder="Tempel URL YouTube di sini...">
+            <button onclick="processVideo()" class="download-button">Proses konten</button>
+        </div>
+        <div id="loading">
+            <div class="loading-spinner"></div>
+            Sedang memproses video...
+        </div>
+        <div id="error"></div>
+        <div id="result"></div>
+        <p class="info-text">Paste URL dari video YouTube yang ingin Anda download MP3/MP4</p>
+    </div>
+
+    <script>
+        async function processVideo() {
+            const videoUrl = document.getElementById('videoUrl').value.trim();
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const result = document.getElementById('result');
+
+            if (!videoUrl) {
+                error.style.display = 'block';
+                error.textContent = 'Mohon masukkan URL YouTube';
+                return;
+            }
+
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            result.innerHTML = '';
+
+            try {
+                const [mp4Response, mp3Response] = await Promise.all([
+                    fetch(`https://api.siputzx.my.id/api/d/ytmp4?url=${encodeURIComponent(videoUrl)}`),
+                    fetch(`https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(videoUrl)}`)
+                ]);
+
+                const mp4Data = await mp4Response.json();
+                const mp3Data = await mp3Response.json();
+
+                let content = `<p style="color: white;">Judul: ${mp4Data.data.title || mp3Data.data.title}</p>`;
+
+                if (mp4Data.status) {
+                    content += `<a href="${mp4Data.data.dl}" class="download-button" target="_blank" rel="noopener noreferrer">Download MP4</a>`;
+                }
+
+                if (mp3Data.status) {
+                    content += `<a href="${mp3Data.data.dl}" class="download-button" target="_blank" rel="noopener noreferrer">Download MP3</a>`;
+                }
+
+                result.innerHTML = content;
+            } catch (err) {
+                error.style.display = 'block';
+                error.textContent = 'Gagal memproses konten. Pastikan URL valid.';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        document.getElementById('videoUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                processVideo();
+            }
+        });
+    </script>
+</body>
+</html>

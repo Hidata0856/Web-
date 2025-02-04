@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-image: url('https://b.top4top.io/p_3314ngfhn1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-color: #0a0a0a;
+        }
+
+        .profile-section {
+            position: absolute;
+            top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 98;
+            width: 100%;
+        }
+
+        .profile-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #ff0055;
+            box-shadow: 0 0 20px #ff0055;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px #ff0055;
+        }
+
+        .animated-text {
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: bold;
+            color: #9333ea;
+            text-shadow: 0 0 8px #9333ea;
+            position: relative;
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .animated-text::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            border-left: 2px solid #9333ea;
+            animation: typing 4s steps(44) infinite;
+        }
+
+        @keyframes typing {
+            0%, 90%, 100% {
+                width: 100%;
+            }
+            30%, 60% {
+                width: 0;
+            }
+        }
+
+        .custom-alert {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            z-index: 1000;
+            max-width: 80%;
+            width: 400px;
+            text-align: center;
+        }
+
+        .profile-alert {
+            border: 2px solid #ff0055;
+            box-shadow: 0 0 30px #ff0055;
+        }
+
+        .about-alert {
+            border: 2px solid #00f2ea;
+            box-shadow: 0 0 30px #00f2ea;
+        }
+
+        .contact-alert {
+            border: 2px solid #1877F2;
+            box-shadow: 0 0 30px #1877F2;
+        }
+
+        .alert-profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+        }
+
+        .profile-alert .alert-profile-img {
+            border: 3px solid #ff0055;
+        }
+
+        .about-alert .alert-profile-img {
+            border: 3px solid #00f2ea;
+        }
+
+        .contact-alert .alert-profile-img {
+            border: 3px solid #1877F2;
+        }
+
+        .alert-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .profile-alert .alert-title {
+            color: #ff0055;
+        }
+
+        .about-alert .alert-title {
+            color: #00f2ea;
+        }
+
+        .contact-alert .alert-title {
+            color: #1877F2;
+        }
+
+        .alert-text {
+            color: white;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .alert-close {
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .profile-alert .alert-close {
+            background: #ff0055;
+        }
+
+        .about-alert .alert-close {
+            background: #00f2ea;
+            color: black;
+        }
+
+        .contact-alert .alert-close {
+            background: #1877F2;
+        }
+
+        .alert-close:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-alert .alert-close:hover {
+            background: #ff2975;
+        }
+
+        .about-alert .alert-close:hover {
+            background: #69C9D0;
+        }
+
+        .contact-alert .alert-close:hover {
+            background: #4267B2;
+        }
+
+        .whatsapp-btn {
+            display: inline-block;
+            background: #25D366;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .whatsapp-btn:hover {
+            background: #128C7E;
+            transform: scale(1.05);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: clamp(12px, 2.5vw, 20px);
+            justify-content: center;
+            width: 90%;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        .neon-button {
+            padding: clamp(12px, 2.5vw, 15px) clamp(20px, 4vw, 25px);
+            border: none;
+            border-radius: clamp(20px, 4vw, 25px);
+            font-size: clamp(13px, 2.8vw, 16px);
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            width: clamp(110px, 28vw, 140px);
+            min-height: clamp(40px, 7vh, 50px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .instagram {
+            background-color: #E1306C;
+            color: white;
+            box-shadow: 0 0 10px #E1306C,
+                        0 0 20px #E1306C;
+        }
+
+        .instagram:hover {
+            background-color: #F56040;
+            box-shadow: 0 0 15px #E1306C,
+                        0 0 30px #E1306C;
+            transform: scale(1.05);
+        }
+
+        .tiktok {
+            background-color: #00f2ea;
+            color: black;
+            box-shadow: 0 0 10px #00f2ea,
+                        0 0 20px #00f2ea;
+        }
+
+        .tiktok:hover {
+            background-color: #69C9D0;
+            box-shadow: 0 0 15px #00f2ea,
+                        0 0 30px #00f2ea;
+            transform: scale(1.05);
+        }
+
+        /* Modified YouTube button */
+        .youtube {
+            background-color: #1a237e;
+            color: white;
+            box-shadow: 0 0 10px #1a237e,
+                        0 0 20px #1a237e;
+        }
+
+        .youtube:hover {
+            background-color: #283593;
+            box-shadow: 0 0 15px #1a237e,
+                        0 0 30px #1a237e;
+            transform: scale(1.05);
+        }
+
+        .ai {
+            background-color: #00ff88;
+            color: black;
+            box-shadow: 0 0 10px #00ff88,
+                        0 0 20px #00ff88;
+        }
+
+        .ai:hover {
+            background-color: #33ff99;
+            box-shadow: 0 0 15px #00ff88,
+                        0 0 30px #00ff88;
+            transform: scale(1.05);
+        }
+
+        /* Modified Facebook button */
+        .facebook {
+            background-color: #ffffff;
+            color: #1877F2;
+            box-shadow: 0 0 10px #ffffff,
+                        0 0 20px #ffffff;
+        }
+
+        .facebook:hover {
+            background-color: #f5f5f5;
+            box-shadow: 0 0 15px #ffffff,
+                        0 0 30px #ffffff;
+            transform: scale(1.05);
+        }
+
+        .x-twitter {
+            background-color: #14171A;
+            color: white;
+            box-shadow: 0 0 10px #14171A,
+                        0 0 20px #14171A;
+        }
+
+        .x-twitter:hover {
+            background-color: #657786;
+            box-shadow: 0 0 15px #14171A,
+                        0 0 30px #14171A;
+            transform: scale(1.05);
+        }
+
+        /* New Game button */
+        .game {
+            background-color: #9c27b0;
+            color: white;
+            box-shadow: 0 0 10px #9c27b0,
+                        0 0 20px #9c27b0;
+        }
+
+        .game:hover {
+            background-color: #ba68c8;
+            box-shadow: 0 0 15px #9c27b0,
+                        0 0 30px #9c27b0;
+            transform: scale(1.05);
+        }
+
+        /* New Prediction button */
+        .prediction {
+            background-color: #ffd700;
+            color: black;
+            box-shadow: 0 0 10px #ffd700,
+                        0 0 20px #ffd700;
+        }
+
+        .prediction:hover {
+            background-color: #ffeb3b;
+            box-shadow: 0 0 15px #ffd700,
+                        0 0 30px #ffd700;
+            transform: scale(1.05);
+        }
+
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            z-index: 100;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+        }
+
+        .menu-btn__burger {
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(255,101,47,.2);
+            transition: all .5s ease-in-out;
+            position: relative;
+        }
+
+        .menu-btn__burger::before,
+        .menu-btn__burger::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(255,101,47,.2);
+            transition: all .5s ease-in-out;
+        }
+
+        .menu-btn__burger::before {
+            transform: translateY(-10px);
+        }
+
+        .menu-btn__burger::after {
+            transform: translateY(10px);
+        }
+
+        .menu-btn.open .menu-btn__burger {
+            transform: translateX(-50px);
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .menu-btn.open .menu-btn__burger::before {
+            transform: rotate(45deg) translate(35px, -35px);
+        }
+
+        .menu-btn.open .menu-btn__burger::after {
+            transform: rotate(-45deg) translate(35px, 35px);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            height: 100vh;
+            width: 300px;
+            background: rgba(0, 0, 0, 0.9);
+            padding-top: 60px;
+            transition: all 0.5s ease-in-out;
+            z-index: 99;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-item {
+            padding: 20px;
+            color: white;
+            font-size: 18px;
+            display: block;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media screen and (max-height: 600px) {
+            .button-container {
+                gap: 12px;
+            }
+            
+            .neon-button {
+                min-height: 35px;
+                width: 100px;
+                font-size: 12px;
+            }
+
+            .profile-image {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        @media screen and (max-width: 360px) {
+            .button-container {
+                gap: 10px;
+            }
+            
+            .neon-button {
+                width: 95px;
+                font-size: 12px;
+                padding: 10px 15px;
+            }
+
+            .sidebar {
+                width: 250px;
+                left: -250px;
+            }
+
+            .profile-image {
+                width: 100px;
+                height: 100px;
+            }
+
+            .custom-alert {
+                width: 90%;
+            }
+            
+            .animated-text {
+                font-</antArtifact>
+            font-size: 0.875rem;
+                line-height: 1.25rem;
+                margin-top: 0.5rem;
+            }
+        }
+
+        @media screen and (min-width: 1200px) {
+            .button-container {
+                gap: 25px;
+            }
+            
+            .neon-button {
+                min-height: 55px;
+                width: 150px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-btn">
+        <div class="menu-btn__burger"></div>
+    </div>
+    
+    <div class="sidebar">
+        <a href="#" class="sidebar-item" id="profile-link">Profile</a>
+        <a href="#" class="sidebar-item" id="about-link">About</a>
+        <a href="#" class="sidebar-item" id="contact-link">Contact Me</a>
+    </div>
+
+    <div class="overlay"></div>
+    
+    <!-- Profile Alert -->
+    <div class="custom-alert profile-alert" id="profile-alert">
+        <img src="https://l.top4top.io/p_3314zok2b1.jpg" alt="Profile" class="alert-profile-img">
+        <div class="alert-title">Taufik Hidayat</div>
+        <div class="alert-text">
+            I am Taufik Hidayat, I created this website to make it easier for my friends in their daily lives. I hope my friends can use this website wisely.
+        </div>
+        <button class="alert-close">Close</button>
+    </div>
+
+    <!-- About Alert -->
+    <div class="custom-alert about-alert" id="about-alert">
+        <img src="https://l.top4top.io/p_3314zok2b1.jpg" alt="About" class="alert-profile-img">
+        <div class="alert-title">About Me</div>
+        <div class="alert-text">
+            I studied at SMK PGRI 1, Kediri city and majored in visual communication design. I'm 16 years old, I'm a boy and I'm learning to make a website. If you encounter any problems, please chat at contact me, thank you ☺️
+        </div>
+        <button class="alert-close">Close</button>
+    </div>
+
+    <!-- Contact Alert -->
+    <div class="custom-alert contact-alert" id="contact-alert">
+        <img src="https://l.top4top.io/p_3314zok2b1.jpg" alt="Contact" class="alert-profile-img">
+        <div class="alert-title">Contact Me</div>
+        <a href="https://wa.me/+6285823614537" class="whatsapp-btn">Chat Me on WhatsApp</a>
+        <button class="alert-close">Close</button>
+    </div>
+
+    <div class="container">
+        <div class="profile-section">
+            <img src="https://l.top4top.io/p_3314zok2b1.jpg" alt="Profile" class="profile-image" id="profile-img">
+            <div class="animated-text">
+                Website ini dibuat oleh Taufik <br>
+                This website was created by Taufik 
+            </div>
+        </div>
+        <div class="button-container">
+            <a href="instagram.html" class="neon-button instagram">Instagram</a>
+            <a href="tiktok.html" class="neon-button tiktok">TikTok</a>
+            <a href="YouTube.html" class="neon-button youtube">YouTube</a>
+            <a href="ai.html" class="neon-button ai">AI</a>
+            <a href="facebook.html" class="neon-button facebook">Facebook</a>
+            <a href="X.html" class="neon-button x-twitter">X</a>
+            <a href="game.html" class="neon-button game">Game</a>
+            <a href="prediksi.html" class="neon-button prediction">Prediction</a>
+        </div>
+    </div>
+
+    <script>
+        const menuBtn = document.querySelector('.menu-btn');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.querySelector('.overlay');
+        const profileAlert = document.getElementById('profile-alert');
+        const aboutAlert = document.getElementById('about-alert');
+        const contactAlert = document.getElementById('contact-alert');
+        const profileImg = document.getElementById('profile-img');
+        const profileLink = document.getElementById('profile-link');
+        const aboutLink = document.getElementById('about-link');
+        const contactLink = document.getElementById('contact-link');
+        const allAlerts = document.querySelectorAll('.custom-alert');
+        const closeButtons = document.querySelectorAll('.alert-close');
+        let menuOpen = false;
+
+        function showAlert(alertElement) {
+            hideAllAlerts();
+            overlay.style.display = 'block';
+            alertElement.style.display = 'block';
+        }
+
+        function hideAllAlerts() {
+            allAlerts.forEach(alert => {
+                alert.style.display = 'none';
+            });
+            overlay.style.display = 'none';
+        }
+
+        menuBtn.addEventListener('click', () => {
+            if(!menuOpen) {
+                menuBtn.classList.add('open');
+                sidebar.classList.add('active');
+                menuOpen = true;
+            } else {
+                menuBtn.classList.remove('open');
+                sidebar.classList.remove('active');
+                menuOpen = false;
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !menuBtn.contains(e.target) && menuOpen) {
+                menuBtn.classList.remove('open');
+                sidebar.classList.remove('active');
+                menuOpen = false;
+            }
+        });
+
+        profileImg.addEventListener('click', () => showAlert(profileAlert));
+        profileLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAlert(profileAlert);
+        });
+
+        aboutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAlert(aboutAlert);
+        });
+
+        contactLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAlert(contactAlert);
+        });
+
+        closeButtons.forEach(button => {
+            button.addEventListener('click', hideAllAlerts);
+        });
+
+        overlay.addEventListener('click', hideAllAlerts);
+    </script>
+</body>
+</html>

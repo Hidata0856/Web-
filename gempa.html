@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Informasi Gempa Terkini</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+      text-align: center;
+      overflow-x: hidden;
+      min-height: 100vh;
+      background: #000;
+    }
+
+    /* Custom Alert Style */
+    .custom-alert {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .alert-content {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 80%;
+      border: 2px solid #FF4500;
+      box-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
+    }
+
+    .alert-content p {
+      color: white;
+      font-size: 1.1em;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+    }
+
+    .alert-button {
+      background: #FF4500;
+      border: none;
+      color: white;
+      padding: 10px 30px;
+      border-radius: 5px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+
+    .alert-button:hover {
+      background: #FFA500;
+      box-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
+    }
+
+    /* Hide main content initially */
+    .main-content {
+      display: none;
+    }
+
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .container {
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      margin: 10px auto;
+      box-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
+    }
+
+    h1 {
+      font-size: 1.8em;
+      color: #FF4500;
+      text-shadow: 0 0 20px #FF4500;
+      margin: 10px 0;
+    }
+
+    .gempa {
+      border-bottom: 2px solid #FF4500;
+      padding: 15px 10px;
+      margin-bottom: 15px;
+    }
+
+    .gempa:last-child {
+      border-bottom: none;
+    }
+
+    .gempa h2 {
+      font-size: 1.3em;
+      margin: 5px 0;
+      color: #FF6347;
+    }
+
+    .gempa p {
+      margin: 8px 0;
+      font-size: 0.95em;
+    }
+
+    .highlight {
+      color: #FFA500;
+      font-weight: bold;
+    }
+
+    footer {
+      margin-top: 15px;
+      font-size: 0.8em;
+      color: #CCCCCC;
+      padding-bottom: 10px;
+    }
+
+    footer a {
+      color: #FF4500 !important;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media screen and (max-width: 480px) {
+      .container {
+        width: 95%;
+        padding: 10px;
+        margin: 5px auto;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+
+      .gempa h2 {
+        font-size: 1.2em;
+      }
+
+      .gempa p {
+        font-size: 0.9em;
+      }
+
+      .alert-content {
+        max-width: 90%;
+        padding: 15px;
+      }
+
+      .alert-content p {
+        font-size: 1em;
+      }
+    }
+
+    * {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Custom Alert -->
+  <div class="custom-alert" id="customAlert">
+    <div class="alert-content">
+      <p>Prediksi ini sesuai dengan BMKG dikarenakan mengambil dari data BMKG secara realtime</p>
+      <button class="alert-button" onclick="acceptAlert()">OK</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <video autoplay muted loop playsinline id="bgVideo">
+      <source src="https://b.top4top.io/m_3314gqktk1.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+
+    <div class="container">
+      <h1>🌏 Informasi Gempa Terkini</h1>
+      <div id="gempa-container"></div>
+      <footer>
+        Data sumber: <a href="https://api.siputzx.my.id" target="_blank">API BMKG</a>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    function acceptAlert() {
+      document.getElementById('customAlert').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      document.getElementById('bgVideo').play();
+      fetchGempa();
+    }
+
+    const url = "https://api.siputzx.my.id/api/info/bmkg";
+
+    async function fetchGempa() {
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.status) {
+          displayGempa(data.data.auto.Infogempa.gempa, data.data.terkini.Infogempa.gempa);
+        } else {
+          document.getElementById('gempa-container').innerHTML = "<p>Tidak ada data gempa.</p>";
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        document.getElementById('gempa-container').innerHTML = "<p>Gagal memuat data gempa.</p>";
+      }
+    }
+
+    function displayGempa(auto, terkini) {
+      const container = document.getElementById('gempa-container');
+      container.innerHTML = '';
+
+      const autoHtml = `
+        <div class="gempa">
+          <h2>⚠️ Gempa Terbaru</h2>
+          <p><span class="highlight">${auto.Tanggal} ${auto.Jam}</span></p>
+          <p>Magnitudo: <span class="highlight">${auto.Magnitude}</span></p>
+          <p>Kedalaman: <span class="highlight">${auto.Kedalaman}</span></p>
+          <p>Wilayah: <span class="highlight">${auto.Wilayah}</span></p>
+          <p>Potensi: <span class="highlight">${auto.Potensi}</span></p>
+        </div>`;
+      container.innerHTML += autoHtml;
+
+      terkini.forEach((gempa) => {
+        const gempaHtml = `
+          <div class="gempa">
+            <h2>📍 Gempa</h2>
+            <p><span class="highlight">${gempa.Tanggal} ${gempa.Jam}</span></p>
+            <p>Magnitudo: <span class="highlight">${gempa.Magnitude}</span></p>
+            <p>Kedalaman: <span class="highlight">${gempa.Kedalaman}</span></p>
+            <p>Wilayah: <span class="highlight">${gempa.Wilayah}</span></p>
+            <p>Potensi: <span class="highlight">${gempa.Potensi}</span></p>
+          </div>`;
+        container.innerHTML += gempaHtml;
+      });
+    }
+
+    setInterval(() => {
+      if (document.getElementById('mainContent').style.display === 'block') {
+        fetchGempa();
+      }
+    }, 300000);
+  </script>
+</body>
+
+</html>

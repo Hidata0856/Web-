@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram Downloader</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background: url('https://via.placeholder.com/1080x1920') no-repeat center center;
+      background-size: cover;
+    }
+    .container {
+      text-align: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+    }
+    h1 {
+      color: #ff0000;
+      font-size: 2rem;
+      text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000;
+      margin-bottom: 20px;
+    }
+    input[type="url"] {
+      width: 80%;
+      padding: 10px;
+      font-size: 1rem;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+    button {
+      background: #ff0000;
+      color: #fff;
+      font-size: 1rem;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+    }
+    button:hover {
+      background: #e60000;
+    }
+    .result {
+      margin-top: 20px;
+    }
+    .thumbnail {
+      max-width: 100%;
+      margin-bottom: 10px;
+    }
+    a {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Instagram Downloader</h1>
+    <input type="url" id="urlInput" placeholder="Paste Instagram URL here" />
+    <button onclick="download()">Download</button>
+    <div id="result" class="result"></div>
+  </div>
+
+  <script>
+    async function download() {
+      const url = document.getElementById('urlInput').value;
+      if (!url) {
+        alert('Please enter a valid URL.');
+        return;
+      }
+
+      const apiUrl = `https://api.siputzx.my.id/api/d/igdl?url=${encodeURIComponent(url)}`;
+
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (data.status) {
+          const resultDiv = document.getElementById('result');
+          resultDiv.innerHTML = ''; // Clear previous results
+
+          data.data.forEach(item => {
+            const thumbnail = document.createElement('img');
+            thumbnail.src = item.thumbnail;
+            thumbnail.alt = 'Thumbnail';
+            thumbnail.className = 'thumbnail';
+
+            const link = document.createElement('a');
+            link.href = item.url;
+            link.target = '_blank';
+            link.innerText = 'Download';
+
+            resultDiv.appendChild(thumbnail);
+            resultDiv.appendChild(link);
+          });
+        } else {
+          alert('Failed to fetch data. Please check the URL.');
+        }
+      } catch (error) {
+        alert('An error occurred while fetching data.');
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>

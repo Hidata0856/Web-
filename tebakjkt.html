@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tebak JKT48 Member</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      background: url('https://f.top4top.io/p_3316fn7ke1.jpg') no-repeat center center/cover;
+      font-family: 'Poppins', sans-serif;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.85);
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
+    }
+
+    h1 {
+      font-size: 28px;
+      text-shadow: 0 0 15px cyan;
+      margin-bottom: 20px;
+    }
+
+    img {
+      width: 100%;
+      max-width: 280px;
+      border-radius: 10px;
+      border: 4px solid white;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+      margin-bottom: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px 20px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      width: 100%;
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 10px rgba(40, 167, 69, 0.5);
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    #timer, #kesempatan {
+      font-size: 18px;
+      margin-top: 10px;
+      font-weight: bold;
+      color: yellow;
+    }
+
+    .custom-alert {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 20px;
+      color: white;
+      display: none;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .alert-success {
+      background-color: #28a745;
+    }
+
+    .alert-fail {
+      background-color: #ff073a;
+    }
+
+    .alert-timeout {
+      background-color: #ffcc00;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Tebak Member JKT48</h1>
+    <img id="memberImage" src="" alt="Foto Member">
+    <input type="text" id="jawaban" placeholder="Ketik nama member di sini">
+    <button onclick="cekJawaban()">Submit Jawaban</button>
+    <p id="kesempatan">Kesempatan Tersisa: 5</p>
+    <p id="timer">Sisa waktu: 1:00</p>
+  </div>
+
+  <div id="customAlert" class="custom-alert"></div>
+
+  <script>
+    let jawabanBenar = "";
+    let waktu = 60;
+    let timer;
+    let kesempatan = 5;
+
+    // Mengambil soal dari API
+    function getSoal() {
+      fetch("https://api.siputzx.my.id/api/games/tebakjkt")
+        .then(response => response.json())
+        .then(data => {
+          jawabanBenar = data.data.jawaban.toLowerCase();
+          document.getElementById("memberImage").src = data.data.gambar;
+          mulaiTimer();
+        })
+        .catch(error => {
+          console.error("Error:", error);
+        });
+    }
+
+    // Timer
+    function mulaiTimer() {
+      clearInterval(timer);
+      waktu = 60;
+      document.getElementById("timer").innerText = "Sisa waktu: 1:00";
+
+      timer = setInterval(() => {
+        if (waktu <= 0) {
+          clearInterval(timer);
+          showAlert(`Waktu habis! Jawaban benar adalah: ${jawabanBenar.toUpperCase()}`, "alert-timeout");
+          setTimeout(resetGame, 3000);
+        } else {
+          let menit = Math.floor(waktu / 60);
+          let detik = waktu % 60;
+          document.getElementById("timer").innerText = `Sisa waktu: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
+          waktu--;
+        }
+      }, 1000);
+    }
+
+    // Cek jawaban
+    function cekJawaban() {
+      let jawabanUser = document.getElementById("jawaban").value.trim().toLowerCase();
+      if (jawabanUser === jawabanBenar) {
+        clearInterval(timer);
+        showAlert("Jawaban benar! Kamu menang!", "alert-success");
+        setTimeout(resetGame, 3000);
+      } else {
+        kesempatan--;
+        document.getElementById("kesempatan").innerText = `Kesempatan Tersisa: ${kesempatan}`;
+        if (kesempatan === 0) {
+          clearInterval(timer);
+          showAlert(`Kamu gagal! Jawaban benar adalah: ${jawabanBenar.toUpperCase()}`, "alert-fail");
+          setTimeout(resetGame, 3000);
+        } else {
+          showAlert("Jawaban salah! Coba lagi.", "alert-fail");
+        }
+      }
+    }
+
+    // Menampilkan alert
+    function showAlert(message, type) {
+      let alertBox = document.getElementById("customAlert");
+      alertBox.innerText = message;
+      alertBox.className = `custom-alert ${type}`;
+      alertBox.style.display = "block";
+
+      setTimeout(() => {
+        alertBox.style.display = "none";
+      }, 2000);
+    }
+
+    // Reset game
+    function resetGame() {
+      document.getElementById("jawaban").value = "";
+      kesempatan = 5;
+      document.getElementById("kesempatan").innerText = "Kesempatan Tersisa: 5";
+      getSoal();
+    }
+
+    getSoal();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asah Otak</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background: url('https://f.top4top.io/p_3316fn7ke1.jpg') no-repeat center center/cover;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+            text-align: center;
+        }
+
+        .quiz-container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 24px;
+            text-shadow: 0 0 10px cyan;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            outline: none;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 12px 20px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            background-color: #ff073a;
+            color: white;
+            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(255, 7, 58, 0.8);
+        }
+
+        button:hover {
+            background-color: #d1062f;
+            box-shadow: 0 0 20px rgba(255, 7, 58, 1);
+        }
+
+        #timer {
+            font-size: 18px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: yellow;
+            text-shadow: 0 0 10px yellow;
+        }
+
+        #kesempatan {
+            font-size: 18px;
+            margin-top: 5px;
+            font-weight: bold;
+            color: lightgreen;
+            text-shadow: 0 0 10px lightgreen;
+        }
+
+        .custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 20px;
+            color: white;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .alert-success {
+            background-color: #28a745;
+            box-shadow: 0 0 20px #28a745;
+        }
+
+        .alert-fail {
+            background-color: #ff073a;
+            box-shadow: 0 0 20px #ff073a;
+        }
+
+        .alert-timeout {
+            background-color: #ffcc00;
+            box-shadow: 0 0 20px #ffcc00;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <h2>Asah Otak</h2>
+        <p id="soal">Memuat soal...</p>
+        <input type="text" id="jawaban" placeholder="Ketik jawaban di sini">
+        <button onclick="cekJawaban()">Submit</button>
+        <p id="timer">Sisa waktu: 1:30</p>
+        <p id="kesempatan">Kesempatan tersisa: 5</p>
+    </div>
+
+    <div id="customAlert" class="custom-alert"></div>
+
+    <script>
+        let jawabanBenar = "";
+        let waktu = 90;
+        let kesempatan = 5;
+        let timer;
+
+        function getSoal() {
+            fetch("https://api.siputzx.my.id/api/games/asahotak")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("soal").innerText = data.data.soal;
+                    jawabanBenar = data.data.jawaban.toLowerCase();
+                    mulaiTimer();
+                })
+                .catch(error => {
+                    document.getElementById("soal").innerText = "Gagal memuat soal.";
+                    console.error("Error:", error);
+                });
+        }
+
+        function mulaiTimer() {
+            timer = setInterval(() => {
+                if (waktu <= 0) {
+                    clearInterval(timer);
+                    showAlert(`Waktu habis! Jawaban benar: ${jawabanBenar}`, "alert-timeout");
+                    setTimeout(resetGame, 3000);
+                } else {
+                    let menit = Math.floor(waktu / 60);
+                    let detik = waktu % 60;
+                    document.getElementById("timer").innerText = `Sisa waktu: ${menit}:${detik < 10 ? '0' : ''}${detik}`;
+                    waktu--;
+                }
+            }, 1000);
+        }
+
+        function cekJawaban() {
+            let jawabanUser = document.getElementById("jawaban").value.trim().toLowerCase();
+            if (jawabanUser === jawabanBenar) {
+                clearInterval(timer);
+                showAlert("Jawaban benar! Kamu menang!", "alert-success");
+                setTimeout(resetGame, 2000);
+            } else {
+                kesempatan--;
+                document.getElementById("kesempatan").innerText = `Kesempatan tersisa: ${kesempatan}`;
+                if (kesempatan > 0) {
+                    showAlert("Jawaban salah! Coba lagi.", "alert-fail");
+                } else {
+                    clearInterval(timer);
+                    showAlert(`Kamu kalah! Jawaban benar: ${jawabanBenar}`, "alert-timeout");
+                    setTimeout(resetGame, 3000);
+                }
+            }
+        }
+
+        function showAlert(message, type) {
+            let alertBox = document.getElementById("customAlert");
+            alertBox.innerText = message;
+            alertBox.className = `custom-alert ${type}`;
+            alertBox.style.display = "block";
+
+            setTimeout(() => {
+                alertBox.style.display = "none";
+            }, 2000);
+        }
+
+        function resetGame() {
+            waktu = 90;
+            kesempatan = 5;
+            document.getElementById("jawaban").value = "";
+            document.getElementById("kesempatan").innerText = `Kesempatan tersisa: ${kesempatan}`;
+            getSoal();
+        }
+
+        getSoal();
+    </script>
+
+</body>
+</html>
